@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <!-- Main content -->
+    <section class="content">
+      <!-- /.row -->
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Update Object Sensor Mapping</h3>
+            </div>
+            <!-- /.box-header -->
+           
+          <!-- ---------------------------- -->
+          <form action="{% url 'update_object_sensor_mapping' data.objectid %}" method="POST">
+            
+                {% csrf_token %}
+          <div class="box-body">
+            <input type="hidden" name="objectid" value="{{data.objectid}}">
+            <div class="col-md-6">
+
+                <div class="form-group">
+                  <label for="objectname">Object Name</label>
+                  <input type="text" name="objectname" class="form-control"value={{data.objectname}} required>
+                </div>
+
+                    <div class="form-group">
+                 <label for="selectedcompany">Company</label>
+                    <select class="form-control" name="selectedcompany" id="selectedcompany" required>
+                      {% if request.user.is_staff or request.user.is_superuser  %}
+                            <option selected disabled value="">Select Company*</option>
+                        {% for companydata in company %}
+                            <option value="{{companydata.companyid}}">{{companydata.companyname}}</option>
+                        {% endfor %}
+                      {% else %}
+                        <option selected  value="{{company.companyid}}">{{company.companyname}}</option>
+                      {% endif %}
+                    </select>
+                  </div>
+                  
+<!-- 
+                <div class="form-group">
+               <label for="selectedcompany">Company</label>
+                  <select class="form-control" name="selectedcompany">
+                    {% for companydata in comp %}
+                    <option value="{{companydata.companyid}}" {% if companydata.companyid == data.companyid.companyid %} selected {% endif %}>{{companydata.companyname}}</option>
+                    {% endfor %}
+                    
+                  </select>
+                  </div> -->
+
+                  <div class="form-group">
+               <label for="selectedsensor">Sensor</label>
+                  <select class="form-control" name="selectedsensor">
+                    {% for sensordata in sensor %}
+                    <option value="{{sensordata.sensorid}}" {% if sensordata.sensorid == data.sensorid.sensorid %} selected {% endif %}>{{sensordata.sensorname}}</option>
+                    {% endfor %}
+                    
+                  </select>
+                  </div>
+
+                  <div class="form-group">
+               <label for="workflowname">Workflow</label>
+                  <select class="form-control" name="selectedworkflow">
+                    {% for workflowdata in workflow %}
+                    <option value="{{workflowdata.workflowid}}" {% if workflowdata.workflowid == data.workflowid.workflowid %} selected {% endif %}>{{workflowdata.workflowname}}</option>
+                    {% endfor %}
+                    
+                  </select>
+                  </div>
+
+                  <div class="form-group">
+               <label for="objecttypename">Object Type</label>
+                  <select class="form-control" name="selectedobjecttype">
+                    {% for objecttypedata in objecttype %}
+                    <option value="{{objecttypedata.objecttypeid}}" {% if objecttypedata.objecttypeid == data.objecttypeid.objecttypeid %} selected {% endif %}>{{objecttypedata.objecttypename}}</option>
+                    {% endfor %}
+                    
+                  </select>
+                  </div>
+
+                  <div class="form-group">
+                  <label for="activerecord">Active</label>
+                 <input type="radio" name="activerecord" {% if data.activerecord == 'Y' %} checked {% endif %} value="Y">Yes
+                <input type="radio" name="activerecord" {% if data.activerecord == 'N'  %} checked {% endif %} value="N" >No
+                </div>
+
+
+                                              <div class="submit_button row">
+          <div class="col-md-3 col-sm-3 col-xs-4">
+                  <div class="form-group">
+                    <a href="{% url 'object_sensor_mapping' %}"><input type="button" value="Cancel" class="form-control btn btn-danger"></a>
+                 </div>
+               </div>
+
+           <div class="col-md-3 col-sm-3 col-xs-4">
+                <div class="form-group">
+                    <input type="submit" class="form-control btn btn-success">
+                 </div>
+               </div>
+
+          
+      </div>
+      
+            </div>
+          <!--   <div class="form-group">
+              <input type="submit" value='Save' class="form-control btn btn-success">
+           </div> -->
+          </div>
+          
+          </form>
+     <!--      <center>
+          <div class="form-group">
+              <a href="{% url 'object_sensor_mapping' %}"><button>Cancel</button></a>
+           </div> 
+           </center> -->
+          <!-- ---------------------------------------- -->
+          
+            <!-- /.box-body -->
+          </div>
+        </div>
+        <!-- /.col -->
+      </div>
+ 
+    </section>
+    {% endblock %}

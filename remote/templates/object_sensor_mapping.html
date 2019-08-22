@@ -1,0 +1,68 @@
+    {% extends 'base.html' %}
+    {% load static %}
+    {% block content %}
+    <!-- Main content -->
+    <section class="content">
+      <!-- /.row -->
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Object Sensor Mapping</h3>
+            </div>
+            <form method="post" action="">
+              {% csrf_token %}
+              <div>
+                  <input type="radio"  name="active" value="Y"
+                         checked>
+                  <label for="activerecord">Active Records</label>
+                </div>
+
+                <div>
+                  <input type="radio"  name="active" value="N">
+                  <label for="activerecord">Deactive Records</label>
+                </div>
+                <button type="submit">Filter</button>
+              
+            </form>
+            <div class="box-body">
+              <table id="example2" class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                  <th>Object Name</th>
+                  <th>Sensor Name</th>
+                  <th>Workflow Name</th>
+                  <th>Company Name</th>
+                  <th>Status</th>
+                  <th>Object Type</th>
+                  <th>Edit</th>
+                  <th>Delete</th>
+                </tr>
+                </thead>
+                <tbody>
+                  {% for data in objectsensormapping %}
+                <tr>
+                  <td>{{data.objectname}}</td>
+                  <td>{{data.sensorid.sensorname}}</td>
+                  <td>{{data.workflowid.workflowname}}</td>
+                  <td>{{data.companyid.companyname}}</td>
+                  <td>{{data.activerecord}}</td>
+                  <td>{{data.objecttypeid.objecttypename}}</td>
+                  <td><a href="{% url 'update_object_sensor_mapping' data.objectid %}">edit</a></td>
+                  <td><span class="glyphicon glyphicon-trash delete-object-sensor-mapping " data-id="{{data.objectid}}"></span></td>
+                  
+                </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+              
+
+            </div>
+            
+          </div>
+        </div>
+        <!-- /.col -->
+      </div>
+    </section>
+    {% endblock %}
+

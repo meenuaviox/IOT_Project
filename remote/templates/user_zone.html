@@ -1,0 +1,55 @@
+    {% extends 'base.html' %}
+    {% load static %}
+    {% block content %}
+    <!-- Main content -->
+    <section class="content">
+      <!-- /.row -->
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Zone Details</h3>
+            </div>
+
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="example2" class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                  <th>Zone Id</th>
+                  <th>Zone Name</th>
+                  <th>Company Name</th>
+                  <!-- <th>Latitude</th>
+                  <th>Longitude</th> -->
+             <!--      <th>zoneimagepath</th> -->
+                  <th>Active Status</th>
+                  <th>Created Date</th>
+                  <th>Edit</th>
+                  <th>Delete</th>
+                </tr>
+                </thead>
+                <tbody>
+                  {% for data in user_zone %}
+                <tr>
+                  <td>{{data.zoneid}}</td>
+                  <td>{{data.zonename}}</td>
+                  <td>{{data.companyid.companyname}}</td>
+                 <!--  <td>{{data.latitude}}</td>
+                  <td>{{data.longitude}}</td> -->
+                  <!-- <td>{{data.zoneimagepath}}</td> -->
+                  <td>{{data.activezone}}</td>
+                  <td>{{data.createddate}}</td>
+                  <td><a href="{% url 'update_zone' data.zoneid %}">edit</a></td> 
+                  <td><span class="glyphicon glyphicon-trash delete-zone" data-id="{{data.zoneid}}"></span></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+        </div>
+        <!-- /.col -->
+      </div>
+    </section>
+    {% endblock %}

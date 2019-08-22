@@ -1,0 +1,9 @@
+CREATE DATABASE defaultdb;
+CREATE USER doadmin WITH PASSWORD 'qobx2dtb1gzlrkyj';
+GRANT ALL PRIVILEGES ON DATABASE defaultdb TO doadmin;
+
+For download:
+scp root@159.65.217.130:/home/360/django/360.zip /home/aviox/Documents/Python/Serverbackup
+
+For upload:
+sudo scp /home/aviox/Documents/Python/Kolafoods/newbackup/kolafood-01-06/kolafoods.zip ubuntu@3.130.52.129:/home/project/kolafood

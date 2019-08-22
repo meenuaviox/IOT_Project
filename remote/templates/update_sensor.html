@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <!-- Main content -->
+    <section class="content">
+      <!-- /.row -->
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Update Sensor</h3>
+            </div>
+            <!-- /.box-header -->
+           
+          <!-- ---------------------------- -->
+          <form action="{% url 'update_sensor' data.sensorid %}" method="POST">
+            
+                {% csrf_token %}
+          <div class="box-body">
+            <input type="hidden" name="sensorid" value="{{data.sensorid}}">
+            <div class="col-md-6">
+
+              <div class="form-group">
+                  <label for="sensorid">Sensor Id</label>
+                  <input type="text"  class="form-control"  value="{{data.sensorid}}" disabled>
+                </div>
+
+
+                <div class="form-group">
+                  <label for="sensorname">Sensor Name</label>
+                  <input type="text" name="sname" class="form-control" id="sn" value="{{data.sensorname}}" required>
+                </div>
+              <div class="form-group">
+                 <label for="selectedcompany">Company</label>
+                    <select class="form-control" name="selectedcompany" id="selectedcompany" required>
+                      {% if request.user.is_staff or request.user.is_superuser  %}
+
+                        <option selected disabled value="">Select Company*</option>
+                        {% for companydata in company %}
+                        <option value="{{companydata.companyid}}">{{companydata.companyname}}</option>
+                        {% endfor %}
+                      {% else %}
+                        
+                        <option selected  value="{{company.companyid}}">{{company.companyname}}</option>
+                       
+                      {% endif %}
+                    </select>
+                  </div>
+
+
+
+
+
+<!-- 
+                <div class="form-group">
+                  <label for="param_types">ParamTypes</label>
+                  <textarea type="text" name="update_param_types" class="form-control" id="param_types" value="" required>{{data.paramtypes}}</textarea>
+                </div> -->
+
+                  <div class="form-group">
+               <label for="selectedsensortype">Sensor Type</label>
+                  <select class="form-control" name="selectedsensortype" id="selectedsensortype" {% if request.user.is_staff or request.user.is_superuser %} {% else %} disabled {% endif %}>
+                    {% for sensortypedata in sensortype %}
+                    <option value="{{sensortypedata.sensortypeid}}" {% if sensortypedata.sensortypeid == data.sensortypeid.sensortypeid %} selected {% endif %}>{{sensortypedata.sensortypename}}</option>
+                    {% endfor %}
+                    
+                  </select>
+                  </div>
+
+                  
+
+                  <div class="form-group">
+                  <label for="activesensor">Active</label>
+                 <input type="radio" name="activesensor" {% if data.activesensor == 'Y' %} checked {% endif %} value="Y">Yes
+                <input type="radio" name="activesensor" {% if data.activesensor == 'N'  %} checked {% endif %} value="N" >No
+                </div>
+
+                
+
+                                                  <div class="submit_button row">
+          <div class="col-md-3 col-sm-3 col-xs-4">
+                  <div class="form-group">
+                    <a href="{% url 'sensors' %}"><input type="button" value="Cancel" class="form-control btn btn-danger"></a>
+                 </div>
+               </div>
+
+           <div class="col-md-3 col-sm-3 col-xs-4">
+                <div class="form-group">
+                    <input type="submit" class="form-control btn btn-success">
+                 </div>
+               </div>
+
+          
+      </div>
+
+
+            </div>
+         <!--    <div class="form-group">
+              <input type="submit" value='Save' class="form-control btn btn-success">
+           </div> -->
+          </div>
+          
+          </form> 
+       <!--    <center>
+          <div class="form-group">
+              <a href="{% url 'sensors' %}"><button>Cancel</button></a>
+           </div>
+           </center> -->
+          <!-- ---------------------------------------- -->
+          
+            <!-- /.box-body -->
+          </div>
+        </div>
+        <!-- /.col -->
+      </div>
+ 
+    </section>
+    {% endblock %}
