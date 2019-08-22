@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <!-- Main content -->
+    <section class="content">
+      <!-- /.row -->
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Update Zone</h3>
+            </div>
+            <!-- /.box-header -->
+           
+          <!-- ---------------------------- -->
+          <form action="{% url 'update_zone' data.zoneid %}" method="POST">
+                {% csrf_token %}
+          <div class="box-body">
+            <div class="col-md-6">
+
+               <div class="form-group">
+                  <label for="zoneid">Zone Id</label>
+                  <input type="text" name="" class="form-control" id="zid" value="{{data.zoneid}}" disabled>
+                </div>
+
+                <div class="form-group">
+                  <label for="zonename">Zone name</label>
+                  <input type="text" name="zname" class="form-control" id="zn" value="{{data.zonename}}" required>
+                </div>
+
+                <div class="form-group">
+                 <label for="selectedcompany"></label>
+                    <select class="form-control" name="selectedcompany" id="selectedcompany" required>
+                      {% if request.user.is_staff or request.user.is_superuser  %}
+
+                        <option selected disabled value="">Select Company*</option>
+                        {% for companydata in company %}
+                        <option value="{{companydata.companyid}}">{{companydata.companyname}}</option>
+                        {% endfor %}
+                      {% else %}
+                        
+                        <option selected  value="{{company.companyid}}">{{company.companyname}}</option>
+                       
+                      {% endif %}
+                    </select>
+                  </div>
+                
+                <div class="form-group">
+                  <label for="activezone">Active</label><br>
+                 <input type="radio" name="active" {% if data.activezone == 'Y' %} checked {% endif %} value="Y">Yes
+                <input type="radio" name="active" {% if data.activezone == 'N'  %} checked {% endif %} value="N" >No
+                </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                  <label for="update_latitude">Latitude</label>
+                  <input type="text" name="update_latitude" class="form-control" id="update_latitude" value="{{data.latitude}}" required>
+                </div>
+              <div class="form-group">
+                  <label for="update_longitude">Longitude</label>
+                  <input type="text" name="update_longitude" class="form-control" id="update_longitude" value="{{data.longitude}}" required>
+                </div>
+              <div class="form-group">
+                  <label for="update_zoneimagepath">Zone image path</label>
+                  <input type="text" name="update_zoneimagepath" class="form-control" id="update_zoneimagepath" value="{{data.zoneimagepath}}" required>
+                </div>
+
+              <div class="submit_button row">
+	          <div class="col-md-3 col-sm-3 col-xs-4">
+	                  <div class="form-group">
+	                    <a href="{% url 'user_zone' %}"><input type="button" value="Cancel" class="form-control btn btn-danger"></a>
+	                 </div>
+	               </div>
+
+	           <div class="col-md-3 col-sm-3 col-xs-4">
+	                <div class="form-group">
+	                    <input type="submit" class="form-control btn btn-success">
+	                 </div>
+	               </div>
+      		</div>
+            </div>
+        <!--     <div class="form-group">
+              <input type="submit" value='Save' class="form-control btn btn-success">
+           </div> -->
+       <!--     <center>
+            <div class="form-group">
+              <a href="{% url 'user_zone' %}"><button>Cancel</button></a>
+           </div>
+           </center> -->
+
+          </div>
+
+          
+          </div>
+          </form> 
+       
+          <!-- ---------------------------------------- -->
+          
+            <!-- /.box-body -->
+          </div>
+        </div>
+        <!-- /.col -->
+      </div>
+ 
+    </section>
+    {% endblock %}

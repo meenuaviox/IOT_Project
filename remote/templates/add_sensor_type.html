@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Add Sensor Type</h3>
+            </div>
+          <form action="" method="POST">
+                {% csrf_token %}
+          <div class="box-body">
+            <div class="col-md-6">
+
+              <!-- <div class="form-group">
+                  <label for="createddate">Created Date</label>
+                  <input type="text"  name="sensortype_createddate" class="form-control date-picker" id="createddate"  placeholder="Created Date*" required>
+                </div> -->
+                          <div class="form-group">
+               <label for="selectedcompany"></label>
+                  <select class="form-control" name="selectedcompany" id="selectedcompany" required>
+
+                    {% if request.user.is_staff or request.user.is_superuser  %}
+
+                      <option selected disabled value="">Select Company*</option>
+
+                      {% for companydata in comp %}
+
+                      <option value="{{companydata.companyid}}">{{companydata.companyname}}</option>
+
+                      {% endfor %}
+
+                    {% else %}
+                      
+                      <option selected value="{{comp.companyid}}">{{comp.companyname}}</option>
+                     
+                    {% endif %}
+                  </select>
+
+                </div>
+
+              <div class="form-group">
+                  <label for="sensortypename"></label>
+                  <input type="text" name="stname" class="form-control" id="stn" placeholder="Sensor Type*" required>
+                </div>
+
+                    <div class="submit_button row">
+          <div class="col-md-3 col-sm-3 col-xs-4">
+                  <div class="form-group">
+                    <a href="{% url 'sensor_type' %}"><input type="button" value="Cancel" class="form-control btn btn-danger"></a>
+                 </div>
+               </div>
+
+           <div class="col-md-3 col-sm-3 col-xs-4">
+                <div class="form-group">
+                    <input type="submit" class="form-control btn btn-success">
+                 </div>
+               </div>
+
+          
+      </div>
+
+   
+            </div>
+         <!--    <div class="form-group">
+              <input type="submit" class="form-control btn btn-success">
+           </div> -->
+          </div>
+           
+          </form> 
+        <!--   <center>
+          <div class="form-group">
+              <a href="{% url 'sensor_type' %}"><button>Cancel</button></a>
+           </div>
+           </center> -->
+          </div>
+        </div>
+      </div> 
+    </section>
+    {% endblock %}

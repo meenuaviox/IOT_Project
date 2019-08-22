@@ -1,0 +1,57 @@
+    {% extends 'base.html' %}
+    {% load static %}
+    {% block content %}
+    <!-- Main content -->
+    <section class="content">
+
+      <!-- /.row -->
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Company Data</h3>
+            </div>
+    {% if messages %}
+              {% for message in messages %}
+                  
+                <p style="color: green;">{{ message }}</p>
+  
+              {% endfor %}
+          {% endif %}
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="example2" class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                  <th>Company Name</th>
+                  <th>Address</th>
+                  <th>Mobile Number</th>
+                  <th>Email Id</th>
+                  <th>Active Status</th>
+                  <th>Edit</th>
+                  <th>Delete</th>
+                </tr>
+                </thead>
+                <tbody>
+                  {% for value in data %}
+                <tr>
+                  <td>{{value.companyname}}</td>
+                  <td>{{value.address1}}</td>
+                  <td>{{value.mobilenumber}}</td>
+                  <td>{{value.emailid}}</td>
+                  <td>{{value.activecompany}}</td>
+                  <td><a href='{% url "update_company" value.companyid %}'>edit</a></td>
+                  <td><span class="glyphicon glyphicon-trash delete-company" data-id="{{value.companyid}}"></span></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+        </div>
+        <!-- /.col -->
+      </div>
+    </section>
+    {% endblock %}
+

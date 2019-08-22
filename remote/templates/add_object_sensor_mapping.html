@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <!-- Main content -->
+    <section class="content">
+      <!-- /.row -->
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Add Object Sensor Mapping</h3>
+            </div>
+            <!-- /.box-header -->
+           
+          <!-- ---------------------------- -->
+          <form action="" method="POST">
+                {% csrf_token %}
+          <div class="box-body">
+            <div class="col-md-6">
+              <div class="form-group">
+                  <label for="objectname"></label>
+                  <input type="text" name="objectname" class="form-control"  placeholder="Object Name*" required >
+                </div>
+
+                <div class="form-group">
+               <label for="selectedsensor"></label>
+                  <select class="form-control" name="selectedsensor" id="selectedsensor" required>
+                    <option selected disabled>Select Sensor*</option>
+                    {% for data in sensor %}
+                    <option value="{{data.sensorid}}">{{data.sensorname}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="form-group">
+               <label for="selectedworkflowname"></label>
+                  <select class="form-control" name="selectedworkflow" id="selectedworkflow" required>
+                    <option selected disabled>Select Workflow*</option>
+                    {% for data in workflow %}
+                    <option value="{{data.workflowid}}">{{data.workflowname}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="form-group">
+               <label for="selectedobjecttypename"></label>
+                  <select class="form-control" name="selectedobjecttype" id="selectedobjecttype" required>
+                    <option selected disabled>Select Object Type*</option>
+                    {% for data in objecttype %}
+                    <option value="{{data.objecttypeid}}">{{data.objecttypename}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                         <div class="form-group">
+               <label for="selectedcompany"></label>
+                  <select class="form-control" name="selectedcompany" id="selectedcompany" required>
+
+                    {% if request.user.is_staff or request.user.is_superuser  %}
+
+                      <option selected disabled value="">Select Company*</option>
+
+                      {% for companydata in comp %}
+
+                      <option value="{{companydata.companyid}}">{{companydata.companyname}}</option>
+
+                      {% endfor %}
+
+                    {% else %}
+                      
+                      <option selected value="{{comp.companyid}}">{{comp.companyname}}</option>
+                     
+                    {% endif %}
+                  </select>
+
+                </div>
+
+                                <div class="form-group">
+                  <label for="activerecord">Active</label><br>
+                  <input type="radio" name="activerecord"  id="activerecord" value="Y" checked>Yes
+                  <input type="radio" name="activerecord"   value="N" >No
+                </div>
+
+    <div class="submit_button row">
+          <div class="col-md-3 col-sm-3 col-xs-4">
+                  <div class="form-group">
+                    <a href="{% url 'object_sensor_mapping' %}"><input type="button" value="Cancel" class="form-control btn btn-danger"></a>
+                 </div>
+               </div>
+
+           <div class="col-md-3 col-sm-3 col-xs-4">
+                <div class="form-group">
+                    <input type="submit" class="form-control btn btn-success">
+                 </div>
+               </div>
+
+          
+      </div>
+
+              
+            </div>
+         <!--    <div class="form-group">
+              <input type="submit" class="form-control btn btn-success">
+           </div> -->
+          </div>
+           
+          </form> 
+       <!--    <div class="form-group">
+              <a href="{% url 'object_sensor_mapping' %}"><button>Cancel</button></a>
+           </div> -->
+          <!-- ---------------------------------------- -->
+          
+            <!-- /.box-body -->
+          </div>
+        </div>
+        <!-- /.col -->
+      </div>
+ 
+    </section>
+    {% endblock %}

@@ -1,0 +1,123 @@
+    {% extends 'base.html' %}
+    {% load static %}
+    {% block content %}
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Object Transaction Details</h3>
+            </div>
+            <div class="box-body">
+              <form action="" method="post">
+                {% csrf_token %}
+                
+              <div class="form-group">
+                  <label for="">From</label>
+                  <input type="text" name="from" id="date-picker-from">
+                </div>
+
+                <div class="form-group">
+                  <label for="">To</label>
+                  <input type="text" name="to" value="{{currentdate}}" class="date-picker">
+                </div>
+              <div class="form-group">
+                <button type="submit" class="btn btn-info">Filter</button>
+              </div>
+              </form>
+
+              
+
+              <table id="transactions_tbl" class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                  <th>Zone Name</th>
+                  <th>Sensor ID</th>
+                  <th>Sensor Name</th>
+                  <th>Object Name</th>
+                  <th>Object Type</th>
+                  <th>Paramvalues</th>
+                  <th>Entry Date Time</th>
+                </tr>
+                </thead>
+                <tbody>
+              
+                  {% for data in transactions %}
+                  
+                <tr>
+                  <td>{{data.zonename}}</td>
+                  <td>{{data.sensorid}}</td>
+                  <td>{{data.sensorname}}</td>
+                  <td>{{data.objectname}}</td>
+                  <td>{{data.objecttypeid.objecttypename}}</td>
+                  <td>{{data.paramvalues}}</td>
+                  <td>{{data.entrydatetime}}</td>
+                </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+              
+
+            </div>
+                <center>
+        <ul class="pagination">
+
+            {% if transactions.has_previous %}
+                <li><a href="?page={{ transactions.previous_page_number }}">Previous</a></li>
+            {% else %}
+                <li class="disabled"><span>Previous</span></li>
+            {% endif %}
+
+            {% if transactions.number|add:'-4' > 1 %}
+                <li><a href="?page={{ transactions.number|add:'-5' }}">&hellip;</a></li>
+            {% endif %}
+
+            {% for i in transactions.paginator.page_range %}
+                {% if transactions.number == i %}
+                    <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                {% elif i > transactions.number|add:'-3' and i < transactions.number|add:'2' %}
+                    <li><a href="?page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if transactions.paginator.num_pages > transactions.number|add:'4' %}
+                <li><a href="?page={{ transactions.number|add:'5' }}">&hellip;</a></li>
+            {% endif %}
+
+            {% if transactions.has_next %}
+                <li><a href="?page={{ transactions.next_page_number }}">Next</a></li>
+            {% else %}
+                <li class="disabled"><span>Next</span></li>
+            {% endif %}
+
+        </ul>
+    </center>
+            
+          </div>
+        </div>
+        <!-- /.col -->
+      </div>
+    </section>
+    {% endblock %}
+
+{% block script %}
+<script type="text/javascript">  $(function () {
+    $('#transactions_tbl').DataTable({
+      'paging'      : false,
+      'lengthChange': false,
+      'searching'   : true,
+      'ordering'    : true,
+      'info'        : false,
+      'autoWidth'   : false
+    })
+  })
+</script>
+<script type="text/javascript">
+  $(function() {
+      $("#date-picker-from").datepicker({ dateFormat: "yy-mm-dd" , maxDate: '-1'});
+      
+  });
+
+</script> 
+
+{% endblock %}

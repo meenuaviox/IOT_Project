@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <!-- Main content -->
+    <section class="content">
+      <!-- /.row -->
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Add Zone</h3>
+            </div>
+            <!-- /.box-header -->
+           
+          <!-- ---------------------------- -->
+          <form action="" method="POST">
+                {% csrf_token %}
+          <div class="box-body">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="zoneid"></label>
+                <input type="text" name="zoneid" class="form-control" id="zoneid" placeholder="Zone ID*" required maxlength="20">
+              </div>
+              <div class="form-group">
+                  <label for="zonename"></label>
+                  <input type="text" name="zname" class="form-control" id="zn" placeholder="Zone Name*" required maxlength="50">
+                </div>
+
+               <div class="form-group">
+               <label for="selectedcompany"></label>
+                  <select class="form-control" name="selectedcompany" id="selectedcompany" required>
+                    {% if request.user.is_staff or request.user.is_superuser  %}
+
+                      <option selected disabled value="">Select Company*</option>
+                      {% for companydata in comp %}
+                      <option value="{{companydata.companyid}}">{{companydata.companyname}}</option>
+                      {% endfor %}
+                    {% else %}
+                      
+                      <option selected  value="{{comp.companyid}}">{{comp.companyname}}</option>
+                     
+                    {% endif %}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="activezone">Active</label>
+                  <input type="radio" name="active"  value="Y" checked>Yes
+                  <input type="radio" name="active"   value="N" >No
+                </div>
+
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="latitude"></label>
+                <input type="text" name="latitude" class="form-control" id="latitude" placeholder="Latitude" maxlength="20">
+              </div>
+              <div class="form-group">
+                <label for="longitude"></label>
+                <input type="text" name="longitude" class="form-control" id="longitude" placeholder="Longitude" maxlength="20">
+              </div>
+              <div class="form-group">
+                <label for="zoneimagepath"></label>
+                <input type="text" name="zoneimagepath" class="form-control" id="zoneimagepath" placeholder="Zone image path">
+              </div>
+            <div class="submit_button row">
+          <div class="col-md-3 col-sm-3 col-xs-4">
+                  <div class="form-group">
+                    <a href="{% url 'user_zone' %}"><input type="button" value="Cancel" class="form-control btn btn-danger"></a>
+                 </div>
+               </div>
+
+           <div class="col-md-3 col-sm-3 col-xs-4">
+                <div class="form-group">
+                    <input type="submit" class="form-control btn btn-success">
+                 </div>
+               </div>
+
+          
+      </div>
+
+            </div>
+         
+          </div>
+           
+          </form> 
+        <!--  -->
+          <!-- ---------------------------------------- -->
+          
+            <!-- /.box-body -->
+          </div>
+        </div>
+        <!-- /.col -->
+      </div>
+ 
+    </section>
+    {% endblock %}

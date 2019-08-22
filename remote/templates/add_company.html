@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <!-- Main content -->
+    <section class="content">
+      <!-- /.row -->
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Add Company</h3>
+            </div>
+            <!-- /.box-header -->
+           
+          <!-- ---------------------------- -->
+
+          <form action="" method="POST">
+                {% csrf_token %}
+          <div class="box-body">
+          {% if messages %}
+              {% for message in messages %}
+                    {% if status == 'success' %}
+                          <p style="color: green;">{{ message }}</p>
+                   {% endif %}
+                   {% if status == 'error' %}
+                        <p style="color: red;">{{ message }}</p>
+                   {% endif %}
+              {% endfor %}
+          {% endif %}
+            <div class="col-md-6">
+                <div class="form-group">
+                  <label for="companyname"></label>
+                  <input type="text" name="cname" class="form-control" id="cn" placeholder="Company name*" required>
+                </div>
+                <div class="form-group">
+                  <label for="address1"></label>
+                  <input type="text" name="address1" class="form-control" id="add1" placeholder="Address 1*" required>
+                </div>
+                <div class="form-group">
+                  <label for="address2"></label>
+                  <input type="text" name="address2" class="form-control" id="add2" placeholder="Address 2">
+                </div>
+                <div class="form-group">
+                  <label for="phonenumber"></label>
+            <!--       <input type="number" name="pnumber" class="form-control" id="pnum" placeholder="Phone Number" min> -->
+
+            <input type="text" class="form-control" pattern=".{10,12}" title="10 to 12 characters" name="pnumber" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" min="10" max="12" placeholder="Phone Number">
+
+                </div>
+                <div class="form-group">
+                  <label for="mobilenumber"></label>
+                  <!-- <input type="number" name="mnumber" class="form-control" id="pnum" placeholder="Mobile*" required> -->
+
+                  <input type="text" class="form-control" pattern=".{10,12}" title="10 to 12 characters" name="mnumber" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" min="10" max="12" placeholder="Mobile Number*" required>
+                </div>
+                <div class="form-group">
+                  <label for="emailid"></label>
+                  <input type="email" name="email" class="form-control" id="emid" placeholder="Example@gmail.com*" required maxlength="50">
+                </div>
+
+                <div class="form-group">
+                  <label for="createddate"></label>
+                  <input type="text"  name="company_createddate" class="form-control date-picker" id="createddate"  placeholder="Created Date*" required autocomplete="off">
+                </div>
+
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="contactperson"></label>
+                  <input type="text" name="cperson" class="form-control" id="cp" placeholder="Contact Person">
+                </div>
+                <div class="form-group">
+                  <label for="designation"></label>
+                  <input type="text" name="desig" class="form-control" id="des" placeholder="Designation">
+                </div>
+                <div class="form-group">
+                  <label for="permittedobjects"></label>
+                  <input type="number" name="pobjects" class="form-control" id="perob" placeholder="Permitted Objects*" min="0" required>
+                </div>
+                <div class="form-group">
+                  <label for="permittedzones"></label>
+                  <input type="number" name="pzones" class="form-control" id="perzon" placeholder="Permitted Zones*" min="0" required>
+                </div>
+
+                 <div class="form-group">
+                  <label for="subscriptionenddate"></label>
+                  <input type="text" name="substart_date" class="form-control date-picker" id="substart_date" placeholder="Subscription Start Date*" required autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                  <label for="subscriptionenddate"></label>
+                  <input type="text" name="subend_date" class="form-control date-picker" id="send" placeholder="Subscription End Date*" required autocomplete="off">
+                </div>
+
+                
+
+            <div class="form-group">
+              <div class="act_company">
+                  <label for="activecompany">Active</label>
+                  <input type="radio" name="activec"  id="activecompany" value="Y" checked>Yes
+                  <input type="radio" name="activec"   value="N" >No
+                </div>
+              </div>
+
+			<div class="submit_button row">
+					<div class="col-md-3 col-sm-3 col-xs-4">
+			            <div class="form-group">
+			              <a href="{% url 'index' %}"><input type="button" value="Cancel" class="form-control btn btn-danger"></a>
+			           </div>
+			         </div>
+
+			 		 <div class="col-md-3 col-sm-3 col-xs-4">
+			          <div class="form-group">
+			              <input type="submit" class="form-control btn btn-success">
+			           </div>
+			         </div>
+
+					
+			</div>
+
+            </div>
+            
+
+          </div>
+           
+          </form> 
+         
+          <!-- ---------------------------------------- -->
+          
+            <!-- /.box-body -->
+          </div>
+        </div>
+        <!-- /.col -->
+      </div>
+ 
+    </section>
+    {% endblock %}

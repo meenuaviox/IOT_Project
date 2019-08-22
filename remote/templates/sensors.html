@@ -1,0 +1,58 @@
+    {% extends 'base.html' %}
+    {% load static %}
+    {% block content %}
+    <!-- Main content -->
+    <section class="content">
+      <!-- /.row -->
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Sensors</h3>
+            </div>
+
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="example2" class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                  <th>Sensor ID</th>
+                  <th>Sensor Name</th>
+                  <th>Sensor Type</th>
+                  <th>Company Name</th>
+                  <!-- <th>Paramtype 5</th>
+                  <th>Paramtype 6</th>
+                  <th>Paramtypes</th> -->
+                  <th>Active status</th>
+                  <th>Edit</th>
+                  <th>Delete</th>
+                </tr>
+                </thead>
+                <tbody>
+                  {% for data in sensors %}
+                <tr>
+                  <td>{{data.sensorid}}</td>
+                  <td>{{data.sensorname}}</td>
+                  <td>{{data.sensortypeid.sensortypename}}</td>
+                  <td>{{data.companyid.companyname}}</td>
+                  <!-- <td>{{data.paramtype5}}</td>
+                  <td>{{data.paramtype6}}</td>
+                  <td>{{data.paramtypes}}</td> -->
+                  <td>{{data.activesensor}}</td>
+                  <td><a href="{% url 'update_sensor' data.sensorid %}">edit</a></td>
+                  <td><span class="glyphicon glyphicon-trash delete-sensor" data-id="{{data.sensorid}}"></span></td>
+                  
+                </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+              
+
+            </div>
+            
+          </div>
+        </div>
+        <!-- /.col -->
+      </div>
+    </section>
+    {% endblock %}

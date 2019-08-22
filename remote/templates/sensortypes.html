@@ -1,0 +1,47 @@
+    {% extends 'base.html' %}
+    {% load static %}
+    {% block content %}
+    <!-- Main content -->
+    <section class="content">
+      <!-- /.row -->
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Sensor Types</h3>
+            </div>
+
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="example2" class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                  <th>Sensor Type</th>
+                  <th>Company Name</th>
+                  <th>Created Date</th>
+                  <th>Edit</th>
+                  <th>Delete</th>
+                </tr>
+                </thead>
+                <tbody>
+                  {% for data in sensor_type %}
+                <tr>
+                  <td>{{data.sensortypename}}</td>
+                  <td>{{data.companyid.companyname}}</td>
+                  <td>{{data.createddate}}</td>
+                  <td><a href="{% url 'update_sensor_type' data.sensortypeid %}">edit</a></td>
+                  <td><span class="glyphicon glyphicon-trash delete-sensor-type" data-id="{{data.sensortypeid}}"></span></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+              
+
+            </div>
+            
+          </div>
+        </div>
+        <!-- /.col -->
+      </div>
+    </section>
+    {% endblock %}
