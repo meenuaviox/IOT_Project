@@ -1,0 +1,47 @@
+    {% extends 'base.html' %}
+    {% load static %}
+    {% block content %}
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">All Object Types</h3>
+            </div>
+            <div class="box-body">
+
+              <table id="example2" class="table table-bordered table-hover detail-table">
+                <thead>
+                <tr>
+                  <th>Object Type</th>
+                  <th>Company Id</th>
+                  <th>Moving Objects</th>
+                  <th>Grouping Required</th>
+                  <th>Group Count</th>
+                  <th>Edit</th>
+                  
+                </tr>
+                </thead>
+                <tbody>
+                  {% for data in objecttypes %}
+                <tr>
+                  <td>{{data.objecttypename}}</td>
+                  <td>{{data.companyid}}</td>
+                  <td>{{data.movingobject}}</td>
+                  <td>{{data.groupingrequired}}</td>
+                  {% if data.groupcount == 0 %}
+                  <td></td>
+                  {% else %}
+                  <td>{{data.groupcount}}</td>
+                  {% endif %}
+                  <td><a href="{% url 'edit_object_type' data.objecttypeid %}">edit</a></td>
+                </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {% endblock %}

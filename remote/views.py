@@ -671,6 +671,7 @@ class ObjectSensorMapping(TemplateView):
 				objecttypes = Objecttypemaster.objects.filter(companyid=companyid).values("objecttypeid","objecttypename").distinct()	
 
 			elif request.user.is_staff:
+
 				objectsensormapping=Objectsensormapping.objects.all()
 				sensors = Sensormaster.objects.values("sensorid").distinct()
 				workflows = Workflowmaster.objects.values("workflowid","workflowname").distinct()
@@ -741,12 +742,23 @@ class AddObjectSensorMapping(TemplateView):
 		return render(request,self.template_name,locals())
 
 	def post(self,request,*args,**kwargs):
+		print(request.POST)
 		objectname=request.POST.get('objectname')
 		sensor=request.POST.get('selectedsensor')
 		workflow=request.POST.get('selectedworkflow')
 		objecttype=request.POST.get('selectedobjecttype')
 		companyid=request.POST.get('selectedcompany')
 		activerecord=request.POST.get('activerecord')
+		if objecttype:
+			response = {}
+			object_type = request.POST.get('object_type')
+			objecttypemaster = Objecttypemaster.objects.get(objecttypeid=object_type)
+			groupingrequired = objecttypemaster.groupingrequired
+			if groupingrequired =='Y':
+				response["status"]=True
+			else:
+				response["status"]=False
+			return HttpResponse(json.dumps(response),content_type="application/json")
 		try:
 			objectsensormapping=Objectsensormapping(
 				objectname=objectname,
@@ -945,3 +957,68 @@ class Detail(TemplateView):
 		return render(request,self.template_name,locals())
 
 
+class AddObjectTypeView(TemplateView):
+	template_name = 'add_object_type.html'
+
+	def post(self,request,*args,**kwargs):
+		objecttypename = request.POST.get("objecttypename")
+		companyid = request.POST.get("companyid")
+		movingobject = request.POST.get("movingobject")
+		groupingrequired = request.POST.get("groupingrequired")
+		groupcount = request.POST.get("groupcount")
+		if movingobject  != 'Y':
+			movingobject = 'N'
+		if groupingrequired != 'Y':
+			groupingrequired = 'N'
+		if groupcount == '':
+			groupcount = 0
+		objecttype_obj = Objecttypemaster(
+			objecttypename = objecttypename,
+			companyid = int(companyid),
+			movingobject = movingobject,
+			groupingrequired = groupingrequired,
+			groupcount = groupcount,
+
+			)
+		objecttype_obj.save()
+		return HttpResponseRedirect('/object-types')
+
+class ObjectTypes(TemplateView):
+	template_name = 'object_types.html'
+	def get(self,request,*args,**kwargs):
+		objecttypes = Objecttypemaster.objects.all().order_by('-objecttypeid')
+		if 'username' in request.session:
+				user= request.session['username']
+				active_user_info=Usermaster.objects.get(username=user)
+				companyid=active_user_info.companyid.companyid
+				objecttypes = Objecttypemaster.objects.filter(companyid=companyid).order_by('-objecttypeid')
+		
+		return render(request,self.template_name,locals())
+
+class EditObjectType(TemplateView):
+	template_name='edit_object_type.html'
+	def get(self,request,*args,**kwargs):
+		object_type_id=kwargs.get('object_type_id')
+		data=Objecttypemaster.objects.get(objecttypeid=object_type_id)
+		return render(request,self.template_name,locals())
+
+	def post(self,request,*args,**kwargs):
+		try:
+			object_type_id=kwargs.get('object_type_id')
+			object_type_obj=Objecttypemaster.objects.get(objecttypeid=object_type_id)
+			object_type_obj.objecttypename = request.POST.get("objecttypename")
+			object_type_obj.companyid = request.POST.get("companyid")
+			object_type_obj.movingobject = request.POST.get("movingobject")
+			object_type_obj.groupingrequired = request.POST.get("groupingrequired")
+			object_type_obj.groupcount = request.POST.get("groupcount")
+			if object_type_obj.movingobject  != 'Y':
+				object_type_obj.movingobject = 'N'
+			if object_type_obj.groupingrequired != 'Y':
+				object_type_obj.groupingrequired = 'N'
+			if object_type_obj.groupcount == '':
+				object_type_obj.groupcount = 0
+
+			object_type_obj.save()
+		except Exception as e:
+			raise e
+		return HttpResponseRedirect('/object-types')

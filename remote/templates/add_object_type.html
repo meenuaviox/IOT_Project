@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<section class="content">
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="box">
+        <div class="box-header">
+              <h3 class="box-title">Add Object Type</h3>
+            </div>
+
+          <form action="" method="POST">
+                {% csrf_token %}
+                <div class="box-body">
+                  <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="objectypename"></label>
+                        <input type="text" name="objecttypename" class="form-control" placeholder="Object Type Name*" required>
+                      </div>
+                <div class="form-group">
+                  <label for="companyid"></label>
+                  <input type="number" name="companyid" class="form-control" placeholder="Company Id*" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="movingobject">Moving Object</label>
+                  <input type="checkbox" name="movingobject" value="Y" >
+                </div>
+
+                <div class="form-group">
+                  <label for="groupingrequired">Grouping Required</label>
+                  <input type="checkbox" name="groupingrequired" value="Y" id="isGRSelected">
+                </div>
+
+                <div class="form-group">
+                  <input type="number" name="groupcount" class="form-control" placeholder="Group Count*" id="GRcount" style="display: none;">
+                </div>
+
+                    <div class="submit_button row">
+          <div class="col-md-3 col-sm-3 col-xs-4">
+                  <div class="form-group">
+                    <a href="{% url 'object_types' %}"><input type="button" value="Cancel" class="form-control btn btn-danger"></a>
+                 </div>
+               </div>
+
+           <div class="col-md-3 col-sm-3 col-xs-4">
+                <div class="form-group">
+                    <input type="submit" class="form-control btn btn-success">
+                 </div>
+               </div>
+            </div>
+          </div>
+           
+          </form> 
+          </div>
+        </div>
+      </div> 
+    </section>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    $("#isGRSelected").on('change',function(){
+
+    if($("#isGRSelected").is(':checked')){
+      $("#GRcount").show();
+      $("#GRcount").prop('required', 'required'); 
+    }
+              
+    else{
+        $("#GRcount").hide();
+        $("#GRcount").val('');
+        $("#GRcount").removeAttr('required');
+
+      } 
+
+   });
+</script>
+{% endblock %}
+
+   

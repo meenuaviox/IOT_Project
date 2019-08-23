@@ -35,6 +35,10 @@ urlpatterns = [
 	path('delete-object-sensor-mapping',DeleteObjectsensormap.as_view(),name='delete_object_sensor_mapping'), 
 	path('object-transaction',Transaction.as_view(),name='object_transaction') ,
     path('object-detail',Detail.as_view(),name='object_detail'),
+    path('add-object-type',AddObjectTypeView.as_view(),name='add_object_type'),
+    path('object-types',ObjectTypes.as_view(),name='object_types'),
+    path('edit-object-type',EditObjectType.as_view(),name='edit_object_type'),
+    path('edit-object-type/<int:object_type_id>',EditObjectType.as_view(),name='edit_object_type'),
     
 
 ]

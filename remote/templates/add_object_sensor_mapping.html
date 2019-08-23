@@ -10,9 +10,6 @@
             <div class="box-header">
               <h3 class="box-title">Add Object Sensor Mapping</h3>
             </div>
-            <!-- /.box-header -->
-           
-          <!-- ---------------------------- -->
           <form action="" method="POST">
                 {% csrf_token %}
           <div class="box-body">
@@ -50,6 +47,11 @@
                     <option value="{{data.objecttypeid}}">{{data.objecttypename}}</option>
                     {% endfor %}
                   </select>
+                </div>
+
+                <div class="form-group" id="masterobject">
+                  <label for="masterobject">Master Object</label>
+                  <input type="checkbox" name="masterobject" value="Y"  style="display:none;">
                 </div>
 
                          <div class="form-group">
@@ -118,3 +120,30 @@
  
     </section>
     {% endblock %}
+
+    {% block script %}
+
+<script type="text/javascript">
+    $('#selectedobjecttype').change(function(){
+ var object_type=$(this).attr("value");
+   $.ajax({
+           url: "add-object-sensor-mapping",
+           type:"POST",
+           data: {
+              'object_type':object_type,'csrfmiddlewaretoken': token,
+           },
+           success: function(response) {
+            alert(response.status);
+               if (response.status == true){
+                $('#masterobject').show();
+               }
+               else{
+                $('#masterobject').hide();
+               }
+           }
+       });
+ });
+ 
+
+</script>
+{% endblock %}
