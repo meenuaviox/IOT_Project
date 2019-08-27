@@ -39,6 +39,7 @@ urlpatterns = [
     path('object-types',ObjectTypes.as_view(),name='object_types'),
     path('edit-object-type',EditObjectType.as_view(),name='edit_object_type'),
     path('edit-object-type/<int:object_type_id>',EditObjectType.as_view(),name='edit_object_type'),
-    
-
+    path("get-filter-detail-data",FilterDetailData.as_view(),name='get_filter_detail_data'),
+    path("get-filter-mapping-data",filterSensorMappingData.as_view(),name='get_filter_mapping_data'),
+ 
 ]

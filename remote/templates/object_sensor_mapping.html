@@ -10,7 +10,7 @@
             <div class="box-header">
               <h3 class="box-title">Object Sensor Mapping</h3>
             </div>
-            <form method="post" action="">
+            <form method="get" action="{% url 'get_filter_mapping_data' %}">
               {% csrf_token %}
               <div>
                   <input type="radio"  name="active" value="Y"
@@ -23,32 +23,32 @@
                   <label for="activerecord">Deactive Records</label>
                 </div>
 
-                <select name="sensorid">
-                  <option value="" selected>All sensors</option>
+                <select name="sensorid" id="sensorid-filter-id">
+                  <option value='' selected>All sensors</option>
                   {% for data in  sensors %}
                   <option value="{{data.sensorid}}">{{data.sensorid}}</option>
                   {% endfor %}
                 </select>
 
-                <select name="workflowname">
-                  <option value="" selected>All Workflows</option>
+                <select name="workflowname" id="workflow-filter-id">
+                  <option value='' selected >All Workflows</option>
                   {% for data in  workflows %}
                   <option value="{{data.workflowid}}">{{data.workflowname}}</option>
                   {% endfor %}
                 </select>
 
-                <select name="objecttype">
-                  <option value="" selected>All objecttypes</option>
+                <select name="objecttype" id="object-type-filter-id">
+                  <option value='' selected >All objecttypes</option>
                   {% for data in  objecttypes %}
                   <option value="{{data.objecttypeid}}">{{data.objecttypename}}</option>
                   {% endfor %}
                 </select>
 
-                <button type="submit" class="btn btn-info">Filter</button>
+                <button type="button" class="btn btn-info" id="sensor_mapping_filter">Filter</button>
               
             </form>
             <div class="box-body">
-              <table id="example2" class="table table-bordered table-hover">
+              <table id="example2" class="table table-bordered table-hover mapping-table">
                 <thead>
                 <tr>
                   <th>Object Name</th>
@@ -61,7 +61,7 @@
                   <th>Delete</th>
                 </tr>
                 </thead>
-                <tbody>
+                <tbody id="mapping_tbl">
                   {% for data in objectsensormapping %}
                 <tr>
                   <td>{{data.objectname}}</td>
@@ -82,5 +82,49 @@
         </div>
       </div>
     </section>
+  
     {% endblock %}
 
+{% block script %}
+<script type="text/javascript">
+
+    $('#sensor_mapping_filter').click(function(){  
+
+    var filter_workflow_name = $('#workflow-filter-id').val();
+    var filter_sensor_id = $('#sensorid-filter-id').val();
+    var filter_object_type = $('#object-type-filter-id').val();
+    var active = $("input[name='active']:checked").val();
+  $.ajax({
+           url: "get-filter-mapping-data",
+           type:"GET",
+           data: {
+              'filter_workflow_name':filter_workflow_name,
+              'filter_sensor_id':filter_sensor_id,
+              'filter_object_type':filter_object_type,
+              'active':active,
+              'csrfmiddlewaretoken': token,
+           },
+           success: function(response) {  
+              
+              if (response.status==true){
+                var row;
+                for(data=0;data<response['response_data'].length;data++){ 
+                  row+="<tr>"+
+                    "<td>"+response['response_data'][data].objectname+"</td>"+
+                    "<td>"+response['response_data'][data].sensorname+"</td>"+
+                    "<td>"+response['response_data'][data].workflowname+"</td>"+
+                    "<td>"+response['response_data'][data].companyname+"</td>"+
+                    "<td>"+response['response_data'][data].status+"</td>"+
+                  "</tr>"
+                }
+            $("#mapping_tbl").html(row);
+              }
+              else{
+                 var table = $('.mapping-table').DataTable();
+                table.clear().draw();
+              }
+            }        
+       });
+  });
+  </script>
+{% endblock %}

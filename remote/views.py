@@ -15,6 +15,10 @@ import uuid
 import random
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import datetime
+from django.utils import timezone
+import operator
+from django.db.models import Q
+from functools import reduce
 
 class IndexView(TemplateView):
 	template_name='index.html'
@@ -658,7 +662,6 @@ class DeleteWorkflow(View):
 
 class ObjectSensorMapping(TemplateView):
 	template_name='object_sensor_mapping.html'
-
 	def get(self, request, *args, **kwargs):
 		try:
 			if 'username' in request.session:
@@ -680,11 +683,18 @@ class ObjectSensorMapping(TemplateView):
 			raise e
 		return render(request,self.template_name,locals())
 
-	def post(self, request, *args, **kwargs):
-		active = request.POST.get("active")
-		sensor_id = request.POST.get("sensorid")
-		workflow_name = request.POST.get("workflowname")
-		object_type = request.POST.get("objecttype")
+class filterSensorMappingData(View):
+
+	def get(self,request,*args,**kwargs):
+
+		response={}
+
+		filter_workflow_name = request.GET.get("filter_workflow_name")
+		filter_sensor_id = request.GET.get("filter_sensor_id")
+		filter_object_type = request.GET.get("filter_object_type")
+		radio_filter = request.GET.get("active")
+		mapping_list=[]
+		query_list = []
 
 		try:
 			if 'username' in request.session:
@@ -692,30 +702,70 @@ class ObjectSensorMapping(TemplateView):
 				active_user_info=Usermaster.objects.get(username=user)
 				companyid=active_user_info.companyid.companyid
 				objectsensormapping=Objectsensormapping.objects.filter(companyid=companyid)
+
 				sensors = Sensormaster.objects.filter(companyid=companyid).values("sensorid").distinct()
 				workflows = Workflowmaster.objects.filter(companyid=companyid).values("workflowid","workflowname").distinct()
 				objecttypes = Objecttypemaster.objects.filter(companyid=companyid).values("objecttypeid","objecttypename").distinct()
-				print('objecttypes',objecttypes)
 
-				if active == 'Y':
-					objectsensormapping=Objectsensormapping.objects.filter(activerecord='Y',sensorid_id=sensor_id,workflowid_id=workflow_name,objecttypeid_id=object_type)
+				if filter_workflow_name:
+					query_list.append(Q(workflowid_id=filter_workflow_name,companyid=companyid))
+				if filter_sensor_id:
+					query_list.append(Q(sensorid_id=filter_sensor_id,companyid=companyid))
+				if filter_object_type:
+					query_list.append(Q(objecttypeid_id=filter_object_type,companyid=companyid))
+				if radio_filter and radio_filter == 'Y':
+					query_list.append(Q(activerecord='Y',companyid=companyid))
+				if radio_filter and radio_filter == 'N':
+					query_list.append(Q(activerecord='N',companyid=companyid))
+
+				if query_list:
+					objectsensormapping = Objectsensormapping.objects.filter(reduce(operator.and_, query_list))
 				else:
-					objectsensormapping=Objectsensormapping.objects.filter(activerecord='N',sensorid_id=sensor_id,workflowid_id=workflow_name,objecttypeid_id=object_type)
-		
+					objectsensormapping = Objectsensormapping.objects.filter(companyid=companyid)
+
+			
+
 			else:
 				objectsensormapping=Objectsensormapping.objects.all()
 				sensors = Sensormaster.objects.values("sensorid").distinct()
 				workflows = Workflowmaster.objects.values("workflowid","workflowname").distinct()
 				objecttypes = Objecttypemaster.objects.values("objecttypeid","objecttypename").distinct()
-				if active == 'Y':
-					objectsensormapping=Objectsensormapping.objects.filter(activerecord='Y',sensorid_id=sensor_id,workflowid_id=workflow_name,objecttypeid_id=object_type)
+
+				if filter_workflow_name:
+					query_list.append(Q(workflowid_id=filter_workflow_name))
+				if filter_sensor_id:
+					query_list.append(Q(sensorid_id=filter_sensor_id))
+				if filter_object_type:
+					query_list.append(Q(objecttypeid_id=filter_object_type))
+				if radio_filter and radio_filter == 'Y':
+					query_list.append(Q(activerecord='Y'))
+				if radio_filter and radio_filter == 'N':
+					query_list.append(Q(activerecord='N'))
+
+				if query_list:
+					objectsensormapping = Objectsensormapping.objects.filter(reduce(operator.and_, query_list))
 				else:
-					objectsensormapping=Objectsensormapping.objects.filter(activerecord='N',sensorid_id=sensor_id,workflowid_id=workflow_name,objecttypeid_id=object_type)
-
-
+					objectsensormapping = Objectsensormapping.objects.all()
+					
+			for data in objectsensormapping:
+				mapping_dict={
+				'objectname':data.objectname,
+				'sensorname':data.sensorid.sensorname,
+				'workflowname':data.workflowid.workflowname,
+				'companyname':data.companyid.companyname,
+				'status':data.activerecord,
+				}
+				mapping_list.append(mapping_dict) 
+			if mapping_list:
+				response['response_data']=mapping_list
+				response['status']=True
+			else:
+				response['status']=False
 		except Exception as e:
+			response['status']=False
 			raise e
-		return render(request,self.template_name,locals())
+		return HttpResponse(json.dumps(response),content_type="application/json")
+
 
 	
 
@@ -742,23 +792,39 @@ class AddObjectSensorMapping(TemplateView):
 		return render(request,self.template_name,locals())
 
 	def post(self,request,*args,**kwargs):
-		print(request.POST)
 		objectname=request.POST.get('objectname')
 		sensor=request.POST.get('selectedsensor')
 		workflow=request.POST.get('selectedworkflow')
 		objecttype=request.POST.get('selectedobjecttype')
 		companyid=request.POST.get('selectedcompany')
-		activerecord=request.POST.get('activerecord')
-		if objecttype:
+		activerecord=request.POST.get('activerecord')	
+		object_type = request.POST.get('object_type')
+		if object_type:
 			response = {}
-			object_type = request.POST.get('object_type')
 			objecttypemaster = Objecttypemaster.objects.get(objecttypeid=object_type)
+			
+			unique_master = Objectsensormapping.objects.filter(objecttypeid_id=object_type,masterobject='Y')
+			if unique_master:
+				unique_master = True
+			else:
+				unique_master = False
 			groupingrequired = objecttypemaster.groupingrequired
-			if groupingrequired =='Y':
+			if groupingrequired =='Y'and unique_master == False:
 				response["status"]=True
 			else:
 				response["status"]=False
+
+			obj_master_records = Objectsensormapping.objects.filter(objecttypeid_id=object_type)
+			groupcount = objecttypemaster.groupcount
+			if  len(obj_master_records) == groupcount:
+				response["record_status"] =False
+			else:
+				response["record_status"] =True
+				
 			return HttpResponse(json.dumps(response),content_type="application/json")
+		masterobject = request.POST.get("masterobject")
+		if masterobject != 'Y':
+			masterobject = 'N'
 		try:
 			objectsensormapping=Objectsensormapping(
 				objectname=objectname,
@@ -767,6 +833,7 @@ class AddObjectSensorMapping(TemplateView):
 				companyid_id=companyid,
 				objecttypeid_id=objecttype,
 				activerecord=activerecord,
+				masterobject = masterobject,
 			)
 			objectsensormapping.save()
 		
@@ -832,16 +899,24 @@ class Transaction(TemplateView):
 	
 
 	def get(self,request,*args,**kwargs):
+		current=datetime.datetime.today().date()
+		currentdate=datetime.datetime.strftime(current, '%Y-%m-%d')
 		try:
-			current=datetime.datetime.today().date()
-			currentdate=datetime.datetime.strftime(current, '%Y-%m-%d')
+			
 			if 'username' in request.session:
 				user= request.session['username']
 				active_user_info=Usermaster.objects.get(username=user)
 				companyid=active_user_info.companyid.companyid
 				transactions1=Objecttransaction.objects.filter(companyid=companyid).order_by('-entrydatetime')
+				zones = Objecttransaction.objects.values("zonename").distinct()
+				sensors = Objecttransaction.objects.values("sensorid").distinct()
+				objecttypes = Objecttypemaster.objects.filter(companyid=companyid).values("objecttypeid","objecttypename").distinct()
 			else:
 				transactions1=Objecttransaction.objects.filter(zonename__isnull=False).order_by('-entrydatetime')
+				zones = Objecttransaction.objects.values("zonename").distinct()
+				sensors = Objecttransaction.objects.values("sensorid").distinct()
+				objecttypes = Objecttypemaster.objects.values("objecttypeid","objecttypename").distinct()
+				print(transactions1[0].objecttypeid,'transactions1')
 			page = request.GET.get('page', 1)
 			paginator = Paginator(transactions1, 10)
 			try:
@@ -855,106 +930,70 @@ class Transaction(TemplateView):
 		return render(request,self.template_name,locals())
 
 	def post(self,request,*args,**kwargs):
-		fromdate = request.POST.get("from")
-		todate = request.POST.get("to")
-		try:
-			if 'username' in request.session:
-				user= request.session['username']
-				active_user_info=Usermaster.objects.get(username=user)
-				companyid=active_user_info.companyid.companyid
-				transactions1=Objecttransaction.objects.filter(entrydatetime__range=[fromdate, todate],companyid=companyid).order_by('-entrydatetime')
-			else:
-				transactions1=Objecttransaction.objects.filter(entrydatetime__range=[fromdate, todate],zonename__isnull=False).order_by('-entrydatetime')
-			page = request.GET.get('page', 1)
-			paginator = Paginator(transactions1, 10)
-			try:
-				transactions = paginator.page(page)
-			except PageNotAnInteger:
-				transactions = paginator.page(1)
-			except EmptyPage:
-				transactions = paginator.page(paginator.num_pages)
-		except Exception as e:
-			raise e
-		return render(request,self.template_name,locals())
-
-
-class Detail(TemplateView):
-	template_name='object_detail.html'
-
-	def get(self,request,*args,**kwargs):
 		current=datetime.datetime.today().date()
 		currentdate=datetime.datetime.strftime(current, '%Y-%m-%d')
-		try:
-			if 'username' in request.session:
-				user= request.session['username']
-				active_user_info=Usermaster.objects.get(username=user)
-				companyid=active_user_info.companyid.companyid
-				details=Objectzonedetails.objects.filter(companyid=companyid)
-				zones = Objectzonedetails.objects.filter(companyid=companyid).values("zonename").distinct()
-				sensor_id = Objectzonedetails.objects.filter(companyid=companyid).values("sensorid").distinct()
-				object_types = Objectzonedetails.objects.filter(companyid=companyid).values("objecttypeid").distinct()
+		query_list = []
+		fromdate = request.POST.get("fromdate")
+		todate = request.POST.get("todate")
+		filter_zone_name = request.POST.get("zonename")
+		filter_sensor_id = request.POST.get("sensorid")
+		filter_object_type = request.POST.get("objecttype")
+		transaction_list=[]
+
+		if 'username' in request.session:
+			user= request.session['username']
+			active_user_info=Usermaster.objects.get(username=user)
+			companyid=active_user_info.companyid.companyid
+
+			zones = Objecttransaction.objects.values("zonename").distinct()
+			sensors = Objecttransaction.objects.values("sensorid").distinct()
+			objecttypes = Objecttypemaster.objects.filter(companyid=companyid).values("objecttypeid","objecttypename").distinct() 
+
+			if fromdate and todate:
+				query_list.append(Q(entrydatetime__range=[fromdate, todate],companyid=companyid))
+			if filter_zone_name:
+				query_list.append(Q(zonename=filter_zone_name,companyid=companyid))
+			if filter_sensor_id:
+				query_list.append(Q(sensorid=filter_sensor_id,companyid=companyid))
+			if filter_object_type:
+				query_list.append(Q(objecttypeid_id=filter_object_type,companyid=companyid))
+
+			if query_list:
+				transactions1 = Objecttransaction.objects.filter(reduce(operator.and_, query_list)).order_by('-entrydatetime')
 			else:
-				details=Objectzonedetails.objects.all()
-				object_types = Objecttypemaster.objects.values("objecttypeid","objecttypename").distinct()
-				zones = Objectzonedetails.objects.values("zonename").distinct()
-				sensor_id = Objectzonedetails.objects.values("sensorid").distinct()
-				
-		except Exception as e:
-			raise e
+				transactions1 = Objecttransaction.objects.filter(companyid=companyid).order_by('-entrydatetime')	
+
+		else:
+			zones = Objecttransaction.objects.values("zonename").distinct()
+			sensors = Objecttransaction.objects.values("sensorid").distinct()
+			objecttypes = Objecttypemaster.objects.values("objecttypeid","objecttypename").distinct()
+
+			if fromdate and todate:
+				query_list.append(Q(entrydatetime__range=[fromdate, todate]))
+			if filter_zone_name:
+				query_list.append(Q(zonename=filter_zone_name))
+			if filter_sensor_id:
+				query_list.append(Q(sensorid=filter_sensor_id))
+			if filter_object_type:
+				query_list.append(Q(objecttypeid_id=filter_object_type))
+
+			if query_list:
+				transactions1 = Objecttransaction.objects.filter(reduce(operator.and_, query_list)).order_by('-entrydatetime')
+			else:
+				transactions1 = Objecttransaction.objects.all().order_by('-entrydatetime')
+
+		page = request.GET.get('page', 1)
+		paginator = Paginator(transactions1, 10)
+		try:
+			transactions = paginator.page(page)
+		except PageNotAnInteger:
+			transactions = paginator.page(1)
+		except EmptyPage:
+			transactions = paginator.page(paginator.num_pages)
+
 		return render(request,self.template_name,locals())
 
-	def post(self,request,*args,**kwargs):
-		fromdate = request.POST.get("from")
-		todate = request.POST.get("to")
-		filter_zone = request.POST.get("filter-zone")
-		filter_sensor_id = request.POST.get("filter-sensor-id")
-		filter_object_type = request.POST.get("filter-object-type")
-		radio_filter = request.POST.get("active")
-		current=datetime.datetime.today().date()
-		currentdate=datetime.datetime.strftime(current, '%Y-%m-%d')
-		try:
-			if 'username' in request.session:
-				user= request.session['username']
-				active_user_info=Usermaster.objects.get(username=user)
-				companyid=active_user_info.companyid.companyid
-				details=Objectzonedetails.objects.filter(companyid=companyid)
-				zones = Objectzonedetails.objects.filter(companyid=companyid).values("zonename").distinct()
-				sensor_id = Objectzonedetails.objects.filter(companyid=companyid).values("sensorid").distinct()
-				object_types = Objecttypemaster.objects.filter(companyid=companyid).values("objecttypeid").distinct()
 
-				if fromdate and todate:
-					if radio_filter == 'Y':
-						details=Objectzonedetails.objects.filter(companyid=companyid,updateddatetime__range=[fromdate, todate],zonename=filter_zone,sensorid=filter_sensor_id,activerecord='Y',objecttypeid_id=filter_object_type)
-					else:
-						details=Objectzonedetails.objects.filter(companyid=companyid,updateddatetime__range=[fromdate, todate],zonename=filter_zone,sensorid=filter_sensor_id,activerecord='N',objecttypeid_id=filter_object_type)
-				else:
-					if radio_filter == 'Y':
-						details=Objectzonedetails.objects.filter(companyid=companyid,zonename=filter_zone,sensorid=filter_sensor_id,activerecord='Y',objecttypeid_id=filter_object_type)
-					else:
-						details=Objectzonedetails.objects.filter(companyid=companyid,zonename=filter_zone,sensorid=filter_sensor_id,activerecord='N',objecttypeid_id=filter_object_type)
-				print('details',details)
-
-			else:
-				details=Objectzonedetails.objects.all()
-				object_types = Objecttypemaster.objects.values("objecttypeid","objecttypename").distinct()
-				zones = Objectzonedetails.objects.values("zonename").distinct()
-				sensor_id = Objectzonedetails.objects.values("sensorid").distinct()
-				if fromdate and todate:
-					if radio_filter == 'Y':
-						details=Objectzonedetails.objects.filter(updateddatetime__range=[fromdate, todate],zonename=filter_zone,sensorid=filter_sensor_id,activerecord='Y',objecttypeid_id=filter_object_type)
-					else:
-						details=Objectzonedetails.objects.filter(updateddatetime__range=[fromdate, todate],zonename=filter_zone,sensorid=filter_sensor_id,activerecord='N',objecttypeid_id=filter_object_type)
-				else:
-					if radio_filter == 'Y':
-						details=Objectzonedetails.objects.filter(zonename=filter_zone,sensorid=filter_sensor_id,activerecord='Y',objecttypeid_id=filter_object_type)
-					else:
-						details=Objectzonedetails.objects.filter(zonename=filter_zone,sensorid=filter_sensor_id,activerecord='N',objecttypeid_id=filter_object_type)
-				print('details',details)
-
-
-		except Exception as e:
-			raise e
-		return render(request,self.template_name,locals())
 
 
 class AddObjectTypeView(TemplateView):
@@ -1022,3 +1061,141 @@ class EditObjectType(TemplateView):
 		except Exception as e:
 			raise e
 		return HttpResponseRedirect('/object-types')
+
+class Detail(TemplateView):
+	template_name='object_detail.html'
+
+	def get(self,request,*args,**kwargs):
+		current=datetime.datetime.today().date()
+		currentdate=datetime.datetime.strftime(current, '%Y-%m-%d')
+		datetime_current = datetime.datetime.now(timezone.utc)
+		try:
+			if 'username' in request.session:
+				user= request.session['username']
+				active_user_info=Usermaster.objects.get(username=user)
+				companyid=active_user_info.companyid.companyid
+				details=Objectzonedetails.objects.filter(companyid=companyid)
+				zones = Objectzonedetails.objects.filter(companyid=companyid).values("zonename").distinct()
+				sensor_id = Objectzonedetails.objects.filter(companyid=companyid).values("sensorid").distinct()
+				object_types = Objecttypemaster.objects.filter(companyid=companyid).values("objecttypeid","objecttypename").distinct()
+			else:
+				details=Objectzonedetails.objects.all()
+				dict_zonechange ={}
+				for value in details:
+					if value.zoneentrydatetime != None:
+						duration = datetime_current-value.zoneentrydatetime
+						duration_in_s = duration.total_seconds()
+						minutes_zonechange = divmod(duration_in_s, 60)[0]
+						objectid=value.objectid.objectid
+						dict_zonechange[objectid]=minutes_zonechange
+				
+				object_types = Objecttypemaster.objects.values("objecttypeid","objecttypename").distinct()
+				zones = Objectzonedetails.objects.values("zonename").distinct()
+				sensor_id = Objectzonedetails.objects.values("sensorid").distinct()
+				
+		except Exception as e:
+			raise e
+		return render(request,self.template_name,locals())
+
+	
+
+
+
+class FilterDetailData(View):
+
+	def get(self,request,*args,**kwargs):
+		response={}
+		current=datetime.datetime.today().date()
+		currentdate=datetime.datetime.strftime(current, '%Y-%m-%d')
+		datetime_current = datetime.datetime.now(timezone.utc)
+		fromdate = request.GET.get("from")
+		todate = request.GET.get("to")
+		filter_zone = request.GET.get("filter_zone")
+		filter_sensor_id = request.GET.get("filter_sensor_id")
+		filter_object_type = request.GET.get("filter_object_type")
+		radio_filter = request.GET.get("active")
+		details_list=[]
+		query_list = []
+		try:
+			if 'username' in request.session:
+				user= request.session['username']
+				active_user_info=Usermaster.objects.get(username=user)
+				companyid=active_user_info.companyid.companyid
+				details=Objectzonedetails.objects.filter(companyid=companyid)
+				zones = Objectzonedetails.objects.filter(companyid=companyid).values("zonename").distinct()
+				sensor_id = Objectzonedetails.objects.filter(companyid=companyid).values("sensorid").distinct()
+				object_types = Objecttypemaster.objects.filter(companyid=companyid).values("objecttypeid","objecttypename").distinct()
+
+				if fromdate and todate:
+					query_list.append(Q(updateddatetime__range=[fromdate, todate],companyid=companyid))
+				if filter_zone:
+					query_list.append(Q(zonename=filter_zone,companyid=companyid))
+				if filter_sensor_id:
+					query_list.append(Q(sensorid=filter_sensor_id,companyid=companyid))
+				if filter_object_type:
+					query_list.append(Q(objecttypeid_id=filter_object_type,companyid=companyid))
+				if radio_filter and radio_filter == 'Y':
+					query_list.append(Q(activerecord='Y',companyid=companyid))
+				if radio_filter and radio_filter == 'N':
+					query_list.append(Q(activerecord='N',companyid=companyid))
+
+				if query_list:
+					details = Objectzonedetails.objects.filter(reduce(operator.and_, query_list))
+				else:
+						details = Objectzonedetails.objects.filter(companyid=companyid)		
+			else:
+				object_types = Objecttypemaster.objects.values("objecttypeid","objecttypename").distinct()
+				zones = Objectzonedetails.objects.values("zonename").distinct()
+				sensor_id = Objectzonedetails.objects.values("sensorid").distinct()
+
+				if fromdate and todate:
+					query_list.append(Q(updateddatetime__range=[fromdate, todate]))
+				if filter_zone:
+					query_list.append(Q(zonename=filter_zone))
+				if filter_sensor_id:
+					query_list.append(Q(sensorid=filter_sensor_id))
+				if filter_object_type:
+					query_list.append(Q(objecttypeid_id=filter_object_type))
+				if radio_filter and radio_filter == 'Y':
+					query_list.append(Q(activerecord='Y'))
+				if radio_filter and radio_filter == 'N':
+					query_list.append(Q(activerecord='N'))
+
+				if query_list:
+					details = Objectzonedetails.objects.filter(reduce(operator.and_, query_list))
+				else:
+						details = Objectzonedetails.objects.all()
+
+				
+			minutes_zonechange = ''
+
+			for data in details:
+				updateddatetime=datetime.datetime.strftime(data.updateddatetime, '%Y-%m-%d')
+
+				if data.zoneentrydatetime != None:
+						duration = datetime_current-data.zoneentrydatetime
+						duration_in_s = duration.total_seconds()
+						minutes_zonechange = divmod(duration_in_s, 60)[0]
+				details_dict={
+				'zonename':data.zonename,
+				'sensorid':data.sensorid,
+				'objectname':data.objectname,
+				'objecttype':data.objecttypeid.objecttypename,
+				'paramvalues':data.paramvalues,
+				'dashboardlink':data.dashboardlink,
+				'updateddatetime':updateddatetime,
+				'timesincezonecahnge':minutes_zonechange
+				}
+				details_list.append(details_dict) 
+
+			if details_list:
+				response['response_data']=details_list
+				response['status']=True
+			else:
+				response['status']=False
+
+		except Exception as e:
+			response['status']=False
+			raise e
+		return HttpResponse(json.dumps(response),content_type="application/json")
+		

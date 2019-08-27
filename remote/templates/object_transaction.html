@@ -10,8 +10,7 @@
             </div>
             <div class="box-body">
               <form action="" method="post">
-                {% csrf_token %}
-                
+                {% csrf_token %}  
               <div class="form-group">
                   <label for="">From</label>
                   <input type="text" name="from" id="date-picker-from">
@@ -21,13 +20,26 @@
                   <label for="">To</label>
                   <input type="text" name="to" value="{{currentdate}}" class="date-picker">
                 </div>
-              <div class="form-group">
-                <button type="submit" class="btn btn-info">Filter</button>
-              </div>
+                  <select name="sensorid" >
+                  <option value='' selected>All sensors</option>
+                  {% for data in  sensors %}
+                  <option value="{{data.sensorid}}">{{data.sensorid}}</option>
+                  {% endfor %}
+                </select>
+                <select name="zonename">
+                  <option value='' selected >All Workflows</option>
+                  {% for data in  zones %}
+                  <option value="{{data.zonename}}">{{data.zonename}}</option>
+                  {% endfor %}
+                </select>
+                <select name="objecttype">
+                  <option value='' selected >All objecttypes</option>
+                  {% for data in  objecttypes %}
+                  <option value="{{data.objecttypeid}}">{{data.objecttypename}}</option>
+                  {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-info" >Filter</button>
               </form>
-
-              
-
               <table id="transactions_tbl" class="table table-bordered table-hover">
                 <thead>
                 <tr>
@@ -41,9 +53,7 @@
                 </tr>
                 </thead>
                 <tbody>
-              
-                  {% for data in transactions %}
-                  
+                  {% for data in transactions %} 
                 <tr>
                   <td>{{data.zonename}}</td>
                   <td>{{data.sensorid}}</td>
@@ -56,12 +66,10 @@
                   {% endfor %}
                 </tbody>
               </table>
-              
-
             </div>
                 <center>
-        <ul class="pagination">
 
+        <ul class="pagination">
             {% if transactions.has_previous %}
                 <li><a href="?page={{ transactions.previous_page_number }}">Previous</a></li>
             {% else %}
@@ -89,13 +97,10 @@
             {% else %}
                 <li class="disabled"><span>Next</span></li>
             {% endif %}
-
         </ul>
     </center>
-            
           </div>
         </div>
-        <!-- /.col -->
       </div>
     </section>
     {% endblock %}
@@ -115,9 +120,6 @@
 <script type="text/javascript">
   $(function() {
       $("#date-picker-from").datepicker({ dateFormat: "yy-mm-dd" , maxDate: '-1'});
-      
   });
-
 </script> 
-
 {% endblock %}

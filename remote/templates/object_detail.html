@@ -9,35 +9,35 @@
               <h3 class="box-title">Object Zone Details</h3>
             </div>
             <div class="box-body">
-              <form action="" method="post">
+              <form action="{% url 'get_filter_detail_data' %}" method="get">
                 {% csrf_token %}
                 
               <div class="form-group">
                   <label for="">From</label>
-                  <input type="text" name="from" id="date-picker-from">
+                  <input type="text" name="from" id="date-picker-from" class="fromdate">
                 </div>
 
                 <div class="form-group">
                   <label for="">To</label>
-                  <input type="text" name="to" value="{{currentdate}}" class="date-picker">
+                  <input type="text" name="to" value="{{currentdate}}" class="date-picker" id="date-picker-to" class="todate">
                 </div>
               
-                <select name="filter-zone">
-                  <option value="" selected>All Zones</option>
+                <select name="filter-zone" id="zone-filter-id">
+                  <option value="" selected >All Zones</option>
                   {% for data in zones %}
                   <option value="{{data.zonename}}">{{data.zonename}}</option>
                   {% endfor %}
                 </select>
 
-                <select name="filter-sensor-id">
-                  <option value="" selected>All Sensors</option>
+                <select name="filter-sensor-id" id="sensorid-filter-id">
+                  <option value="" selected disabled>All Sensors</option>
                   {% for data in sensor_id %}
                   <option value="{{data.sensorid}}">{{data.sensorid}}</option>
                   {% endfor %}
                 </select>
 
-                <select name="filter-object-type">
-                  <option value="" selected>All object types</option>
+                <select name="filter-object-type" id="object-type-filter-id">
+                  <option value="" selected disabled>All object types</option>
                   {% for data in object_types %}
                   <option value="{{data.objecttypeid}}">{{data.objecttypename}}</option>
                   {% endfor %}
@@ -45,17 +45,17 @@
 
                 <div>
                   <input type="radio"  name="active"  value="Y"
-                         checked>
+                         checked class="radio-filter">
                   <label for="activerecord">Active Records</label>
                 </div>
 
                 <div>
-                  <input type="radio"  name="active"  value="N">
+                  <input type="radio"  name="active"  value="N" class="radio-filter">
                   <label for="activerecord">Deactive Records</label>
                 </div>
 
                 <div class="form-group">
-                <button type="submit" class="btn btn-info">Filter</button>
+                <button type="button" id="obj_detail_filter" class="btn btn-info">Filter</button>
               </div>
 
               </form>
@@ -72,10 +72,11 @@
                   <th>Paramvalues</th>
                   <th>Dashboard Links</th>
                   <th>Updated Date & Time</th>
+                  <th>Time(in minutes) Since Zone Change</th>
                   
                 </tr>
                 </thead>
-                <tbody>
+                <tbody id="detail_tbl">
                   {% for data in details %}
                 <tr>
                   <td>{{data.zonename}}</td>
@@ -88,30 +89,80 @@
                   {% else %}
                     <td></td> 
                   {% endif %}
-                  <td>{{data.updateddatetime}}</td>     
-
+                  <td>{{data.updateddatetime}}</td> 
+                  {% for key,value in dict_zonechange.items %}
+                  {% if data.objectid.objectid == key %}
+                  <td>{{value}}</td>
+                  {% endif %}    
+                  {% endfor %}
                 </tr>
                   {% endfor %}
                 </tbody>
               </table>
-              
-
             </div>
-            
           </div>
         </div>
-        <!-- /.col -->
       </div>
     </section>
     {% endblock %}
-
     {% block script %}
 
 <script type="text/javascript">
   $(function() {
-      $("#date-picker-from").datepicker({ dateFormat: "yy-mm-dd" , maxDate: '-1'});
-      
+      $("#date-picker-from").datepicker({ dateFormat: "yy-mm-dd" , maxDate: '-1'});    
   });
 
+  $('#obj_detail_filter').click(function(){  
+  var from = $("input[name='from']").val();
+  var to = $("input[name='to']").val();
+  var filter_zone = $('#zone-filter-id').val();
+  var filter_sensor_id = $('#sensorid-filter-id').val();
+  var filter_object_type = $('#object-type-filter-id').val();
+  var active = $("input[name='active']:checked").val();
+ $.ajax({
+         url: "get-filter-detail-data",
+         type:"GET",
+         data: {
+            'from':from,
+            'to':to,
+            'filter_zone':filter_zone,
+            'filter_sensor_id':filter_sensor_id,
+            'filter_object_type':filter_object_type,
+            'active':active,
+            'csrfmiddlewaretoken': token,
+         },
+         success: function(response) {  
+            
+            if (response.status==true){
+              
+              var row;
+              for(data=0;data<response['response_data'].length;data++){
+                
+                row+="<tr>"+
+                  "<td>"+response['response_data'][data].zonename+"</td>"+
+                  "<td>"+response['response_data'][data].sensorid+"</td>"+
+                  "<td>"+response['response_data'][data].objectname+"</td>"+
+                  "<td>"+response['response_data'][data].objecttype+"</td>"+
+                  "<td>"+response['response_data'][data].paramvalues+"</td>"+
+                    "<td>"+response['response_data'][data].dashboardlink+"</td>"+ 
+                 
+                    "<td>"+response['response_data'][data].updateddatetime+"</td>"+ 
+                  
+                  "<td>"+response['response_data'][data].timesincezonecahnge+"</td>"+
+                "</tr>"
+
+
+              }
+          $("#detail_tbl").html(row);
+            }
+            else{
+              
+               var table = $('.detail-table').DataTable();
+              table.clear().draw();
+            }
+          }
+              
+     });
+});
 </script> 
 {% endblock %}
