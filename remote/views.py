@@ -18,6 +18,7 @@ import datetime
 from django.utils import timezone
 import operator
 from django.db.models import Q
+from django.template.loader import render_to_string
 from functools import reduce
 
 class IndexView(TemplateView):
@@ -897,76 +898,23 @@ class DeleteObjectsensormap(View):
 class Transaction(TemplateView):
 	template_name='object_transaction.html'
 	
-
 	def get(self,request,*args,**kwargs):
 		current=datetime.datetime.today().date()
 		currentdate=datetime.datetime.strftime(current, '%Y-%m-%d')
-		try:
-			
-			if 'username' in request.session:
-				user= request.session['username']
-				active_user_info=Usermaster.objects.get(username=user)
-				companyid=active_user_info.companyid.companyid
-				transactions1=Objecttransaction.objects.filter(companyid=companyid).order_by('-entrydatetime')
-				zones = Objecttransaction.objects.values("zonename").distinct()
-				sensors = Objecttransaction.objects.values("sensorid").distinct()
-				objecttypes = Objecttypemaster.objects.filter(companyid=companyid).values("objecttypeid","objecttypename").distinct()
-			else:
-				transactions1=Objecttransaction.objects.filter(zonename__isnull=False).order_by('-entrydatetime')
-				zones = Objecttransaction.objects.values("zonename").distinct()
-				sensors = Objecttransaction.objects.values("sensorid").distinct()
-				objecttypes = Objecttypemaster.objects.values("objecttypeid","objecttypename").distinct()
-				print(transactions1[0].objecttypeid,'transactions1')
-			page = request.GET.get('page', 1)
-			paginator = Paginator(transactions1, 10)
-			try:
-				transactions = paginator.page(page)
-			except PageNotAnInteger:
-				transactions = paginator.page(1)
-			except EmptyPage:
-				transactions = paginator.page(paginator.num_pages)
-		except Exception as e:
-			pass
-		return render(request,self.template_name,locals())
+		zones = Objecttransaction.objects.values("zonename").distinct()
+		sensors = Objecttransaction.objects.values("sensorid").distinct()
+		objecttypes = Objecttypemaster.objects.values("objecttypeid","objecttypename").distinct()
 
-	def post(self,request,*args,**kwargs):
 		current=datetime.datetime.today().date()
 		currentdate=datetime.datetime.strftime(current, '%Y-%m-%d')
+		
 		query_list = []
-		fromdate = request.POST.get("fromdate")
-		todate = request.POST.get("todate")
-		filter_zone_name = request.POST.get("zonename")
-		filter_sensor_id = request.POST.get("sensorid")
-		filter_object_type = request.POST.get("objecttype")
-		transaction_list=[]
-
-		if 'username' in request.session:
-			user= request.session['username']
-			active_user_info=Usermaster.objects.get(username=user)
-			companyid=active_user_info.companyid.companyid
-
-			zones = Objecttransaction.objects.values("zonename").distinct()
-			sensors = Objecttransaction.objects.values("sensorid").distinct()
-			objecttypes = Objecttypemaster.objects.filter(companyid=companyid).values("objecttypeid","objecttypename").distinct() 
-
-			if fromdate and todate:
-				query_list.append(Q(entrydatetime__range=[fromdate, todate],companyid=companyid))
-			if filter_zone_name:
-				query_list.append(Q(zonename=filter_zone_name,companyid=companyid))
-			if filter_sensor_id:
-				query_list.append(Q(sensorid=filter_sensor_id,companyid=companyid))
-			if filter_object_type:
-				query_list.append(Q(objecttypeid_id=filter_object_type,companyid=companyid))
-
-			if query_list:
-				transactions1 = Objecttransaction.objects.filter(reduce(operator.and_, query_list)).order_by('-entrydatetime')
-			else:
-				transactions1 = Objecttransaction.objects.filter(companyid=companyid).order_by('-entrydatetime')	
-
-		else:
-			zones = Objecttransaction.objects.values("zonename").distinct()
-			sensors = Objecttransaction.objects.values("sensorid").distinct()
-			objecttypes = Objecttypemaster.objects.values("objecttypeid","objecttypename").distinct()
+		fromdate = request.GET.get("fromdate")
+		todate = request.GET.get("todate")
+		filter_zone_name = request.GET.get("zonename")
+		filter_sensor_id = request.GET.get("sensorid")
+		filter_object_type = request.GET.get("objecttype")
+		try:
 
 			if fromdate and todate:
 				query_list.append(Q(entrydatetime__range=[fromdate, todate]))
@@ -980,19 +928,21 @@ class Transaction(TemplateView):
 			if query_list:
 				transactions1 = Objecttransaction.objects.filter(reduce(operator.and_, query_list)).order_by('-entrydatetime')
 			else:
-				transactions1 = Objecttransaction.objects.all().order_by('-entrydatetime')
-
-		page = request.GET.get('page', 1)
-		paginator = Paginator(transactions1, 10)
-		try:
-			transactions = paginator.page(page)
-		except PageNotAnInteger:
-			transactions = paginator.page(1)
-		except EmptyPage:
-			transactions = paginator.page(paginator.num_pages)
-
+				transactions1 = Objecttransaction.objects.filter(zonename__isnull=False).order_by('-entrydatetime')
+			print("transactions1>>>",transactions1.count())
+			page = request.GET.get('page', 1)
+			paginator = Paginator(transactions1, 100)
+			try:
+				transactions = paginator.page(page)
+			except PageNotAnInteger:
+				transactions = paginator.page(1)
+			except EmptyPage:
+				transactions = paginator.page(paginator.num_pages)
+		except Exception as e:
+			raise e
 		return render(request,self.template_name,locals())
 
+	
 
 
 

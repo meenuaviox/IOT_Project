@@ -9,36 +9,57 @@
               <h3 class="box-title">Object Transaction Details</h3>
             </div>
             <div class="box-body">
-              <form action="" method="post">
-                {% csrf_token %}  
-              <div class="form-group">
-                  <label for="">From</label>
-                  <input type="text" name="from" id="date-picker-from">
-                </div>
+              <form action="" method="get">
+               
+                <div class="row">
+                  <div class="col-md-3 fliter_select">
+                    <div class="form-group form_label">
+                      <label for="">From</label>
+                      <input type="text" name="from" id="date-picker-from">
+                    </div>
 
-                <div class="form-group">
-                  <label for="">To</label>
-                  <input type="text" name="to" value="{{currentdate}}" class="date-picker">
+                    <div class="form-group form_label">
+                      <label for="">To</label>
+                      <input type="text"id="todate" name="to" value="{{currentdate}}" class="date-picker">
+                    </div>
+                  </div>
+                  <div class="col-md-9 fliter_select">
+                    <select name="sensorid" id="sensorid">
+                      <option value='' selected>All sensors</option>
+                      {% for data in  sensors %}
+                      <option value="{{data.sensorid}}">{{data.sensorid}}</option>
+                      {% endfor %}
+                    </select>
+
+
+                    <select name="zonename" id="zonename">
+                      {% if not filter_zone_name %}
+                      <option value='' selected >All Zones</option>
+                      {% endif %}
+
+                      {% for data in  zones %}
+                         {% if filter_zone_name %}
+                           {% if data.zonename == filter_zone_name %}
+                              <option value="{{data.zonename}}" selected>{{data.zonename}}</option>
+                          
+                           {% endif %}
+                                                  
+                        {% endif %}
+
+                      <option value="{{data.zonename}}">{{data.zonename}}</option>
+                      {% endfor %}
+                    </select>
+
+
+                    <select name="objecttype" id="objecttype">
+                      <option value='' selected >All objecttypes</option>
+                      {% for data in  objecttypes %}
+                      <option value="{{data.objecttypeid}}">{{data.objecttypename}}</option>
+                      {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-info" id="filter_tran_data">Filter</button>
+                  </div>
                 </div>
-                  <select name="sensorid" >
-                  <option value='' selected>All sensors</option>
-                  {% for data in  sensors %}
-                  <option value="{{data.sensorid}}">{{data.sensorid}}</option>
-                  {% endfor %}
-                </select>
-                <select name="zonename">
-                  <option value='' selected >All Workflows</option>
-                  {% for data in  zones %}
-                  <option value="{{data.zonename}}">{{data.zonename}}</option>
-                  {% endfor %}
-                </select>
-                <select name="objecttype">
-                  <option value='' selected >All objecttypes</option>
-                  {% for data in  objecttypes %}
-                  <option value="{{data.objecttypeid}}">{{data.objecttypename}}</option>
-                  {% endfor %}
-                </select>
-                <button type="submit" class="btn btn-info" >Filter</button>
               </form>
               <table id="transactions_tbl" class="table table-bordered table-hover">
                 <thead>
@@ -52,7 +73,7 @@
                   <th>Entry Date Time</th>
                 </tr>
                 </thead>
-                <tbody>
+                <tbody id="data_tbl">
                   {% for data in transactions %} 
                 <tr>
                   <td>{{data.zonename}}</td>
@@ -69,9 +90,15 @@
             </div>
                 <center>
 
+
+
+
+
         <ul class="pagination">
             {% if transactions.has_previous %}
-                <li><a href="?page={{ transactions.previous_page_number }}">Previous</a></li>
+            
+             <li><a href="?page={{ transactions.previous_page_number }}">Previous</a></li>
+         
             {% else %}
                 <li class="disabled"><span>Previous</span></li>
             {% endif %}
@@ -84,7 +111,16 @@
                 {% if transactions.number == i %}
                     <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
                 {% elif i > transactions.number|add:'-3' and i < transactions.number|add:'2' %}
-                    <li><a href="?page={{ i }}">{{ i }}</a></li>
+
+
+
+            {% if fromdate or todate or filter_zone_name or filter_sensor_id or filter_object_type %}
+                    <li><a href="?from={{fromdate}}&to={{todate}}&zonename={{filter_zone_name}}&sensorid={{filter_sensor_id}}&objecttype={{filter_object_type}}&page={{ i }}">{{ i }}</a></li>
+                 {% else %}
+                      <li><a href="?page={{ i }}">{{ i }}</a></li>
+            {% endif %}
+
+
                 {% endif %}
             {% endfor %}
 
@@ -103,6 +139,9 @@
         </div>
       </div>
     </section>
+    <script type="text/javascript">
+      var token ="{{csrf_token}}";
+    </script>
     {% endblock %}
 
 {% block script %}
@@ -122,4 +161,6 @@
       $("#date-picker-from").datepicker({ dateFormat: "yy-mm-dd" , maxDate: '-1'});
   });
 </script> 
+
+
 {% endblock %}

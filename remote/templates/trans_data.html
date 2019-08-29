@@ -1,0 +1,11 @@
+    {% for data in transactions1 %} 
+                <tr>
+                  <td>{{data.zonename}}</td>
+                  <td>{{data.sensorid}}</td>
+                  <td>{{data.sensorname}}</td>
+                  <td>{{data.objectname}}</td>
+                  <td>{{data.objecttypeid.objecttypename}}</td>
+                  <td>{{data.paramvalues}}</td>
+                  <td>{{data.entrydatetime}}</td>
+                </tr>
+  {% endfor %}

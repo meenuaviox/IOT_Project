@@ -1,0 +1,12 @@
+.form_label label {
+	width: 20%;
+}
+.fliter_select select {
+	padding: 6px 5px;
+}
+.fliter_select input {
+	padding: 6px 5px;
+}
+.fliter_select button {
+	margin-top: -3px;
+}

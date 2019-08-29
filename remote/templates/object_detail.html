@@ -11,53 +11,54 @@
             <div class="box-body">
               <form action="{% url 'get_filter_detail_data' %}" method="get">
                 {% csrf_token %}
-                
-              <div class="form-group">
-                  <label for="">From</label>
-                  <input type="text" name="from" id="date-picker-from" class="fromdate">
+              <div class="row">
+                <div class="col-md-3 fliter_select">
+                  <div class="form-group form_label">
+                    <label for="">From</label>
+                    <input type="text" name="from" id="date-picker-from" class="fromdate">
+                  </div>
+
+                  <div class="form-group form_label">
+                    <label for="">To</label>
+                    <input type="text" name="to" value="{{currentdate}}" class="date-picker" id="date-picker-to" class="todate">
+                  </div>
                 </div>
+                <div class="col-md-9 fliter_select">
+                  <select name="filter-zone" id="zone-filter-id">
+                    <option value="" selected >All Zones</option>
+                    {% for data in zones %}
+                    <option value="{{data.zonename}}">{{data.zonename}}</option>
+                    {% endfor %}
+                  </select>
+                  
+                  <select name="filter-sensor-id" id="sensorid-filter-id">
+                    <option value="" selected disabled>All Sensors</option>
+                    {% for data in sensor_id %}
+                    <option value="{{data.sensorid}}">{{data.sensorid}}</option>
+                    {% endfor %}
+                  </select>
+                  <select name="filter-object-type" id="object-type-filter-id">
+                    <option value="" selected disabled>All object types</option>
+                    {% for data in object_types %}
+                    <option value="{{data.objecttypeid}}">{{data.objecttypename}}</option>
+                    {% endfor %}
+                  </select>
+                  <div>
+                    <input type="radio"  name="active"  value="Y"
+                           checked class="radio-filter">
+                    <label for="activerecord">Active Records</label>
+                  </div>
 
-                <div class="form-group">
-                  <label for="">To</label>
-                  <input type="text" name="to" value="{{currentdate}}" class="date-picker" id="date-picker-to" class="todate">
+                  <div>
+                    <input type="radio"  name="active"  value="N" class="radio-filter">
+                    <label for="activerecord">Deactive Records</label>
+                  </div>
+
+                  <div class="form-group">
+                    <button type="button" id="obj_detail_filter" class="btn btn-info">Filter</button>
+                  </div>
                 </div>
-              
-                <select name="filter-zone" id="zone-filter-id">
-                  <option value="" selected >All Zones</option>
-                  {% for data in zones %}
-                  <option value="{{data.zonename}}">{{data.zonename}}</option>
-                  {% endfor %}
-                </select>
-
-                <select name="filter-sensor-id" id="sensorid-filter-id">
-                  <option value="" selected disabled>All Sensors</option>
-                  {% for data in sensor_id %}
-                  <option value="{{data.sensorid}}">{{data.sensorid}}</option>
-                  {% endfor %}
-                </select>
-
-                <select name="filter-object-type" id="object-type-filter-id">
-                  <option value="" selected disabled>All object types</option>
-                  {% for data in object_types %}
-                  <option value="{{data.objecttypeid}}">{{data.objecttypename}}</option>
-                  {% endfor %}
-                </select>
-
-                <div>
-                  <input type="radio"  name="active"  value="Y"
-                         checked class="radio-filter">
-                  <label for="activerecord">Active Records</label>
-                </div>
-
-                <div>
-                  <input type="radio"  name="active"  value="N" class="radio-filter">
-                  <label for="activerecord">Deactive Records</label>
-                </div>
-
-                <div class="form-group">
-                <button type="button" id="obj_detail_filter" class="btn btn-info">Filter</button>
               </div>
-
               </form>
 
               
